@@ -36,10 +36,10 @@ namespace LinearProgramming
             var resultPoint = _configuration.Type switch
             {
                 OptimizationType.ToMax => intersectionPoints
-                    .OrderByDescending(point => _configuration.MainFunction.GetResult(new[] { point.First, point.Second }))
+                    .OrderByDescending(point => _configuration.TargetFunction.GetResult(new[] { point.First, point.Second }))
                     .First(),
                 OptimizationType.ToMin => intersectionPoints
-                    .OrderBy(point => _configuration.MainFunction.GetResult(new[] { point.First, point.Second }))
+                    .OrderBy(point => _configuration.TargetFunction.GetResult(new[] { point.First, point.Second }))
                     .First(),
                 _ => throw new NotImplementedException()
             };
@@ -79,7 +79,7 @@ namespace LinearProgramming
         private static void EnsureIsValidConfiguration(TwoDimensionalTaskSolverConfiguration configuration)
         {
             if (configuration.ConstraintFunctions
-                .Append(configuration.MainFunction)
+                .Append(configuration.TargetFunction)
                 .Any(linearFunction => linearFunction.Dimension is not 2))
                 throw new Exception("The dimension of one of the functions is not equal to two.");
         }
@@ -89,7 +89,7 @@ namespace LinearProgramming
     {
         public IReadOnlyCollection<LinearFunction> ConstraintFunctions { get; init; }
 
-        public LinearFunction MainFunction { get; init; }
+        public LinearFunction TargetFunction { get; init; }
 
         public OptimizationType Type { get; init; }
     }
