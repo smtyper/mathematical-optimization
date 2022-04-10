@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinearProgramming", "LinearProgramming\LinearProgramming.csproj", "{1F91A0D2-1CB8-4B61-9A2D-B6C2ABD53C9D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransportTask", "TransportTask\TransportTask.csproj", "{D79CF217-AC38-49CE-A3B4-C68D59D1AA37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{1F91A0D2-1CB8-4B61-9A2D-B6C2ABD53C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F91A0D2-1CB8-4B61-9A2D-B6C2ABD53C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F91A0D2-1CB8-4B61-9A2D-B6C2ABD53C9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D79CF217-AC38-49CE-A3B4-C68D59D1AA37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D79CF217-AC38-49CE-A3B4-C68D59D1AA37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D79CF217-AC38-49CE-A3B4-C68D59D1AA37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D79CF217-AC38-49CE-A3B4-C68D59D1AA37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
