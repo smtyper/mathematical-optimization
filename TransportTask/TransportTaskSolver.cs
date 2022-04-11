@@ -4,25 +4,30 @@ namespace TransportTask;
 
 public class TransportTaskSolver
 {
-    private readonly TransportTaskTable _transportTaskTable;
     private readonly IPrimalBasisSearcher _primalBasisSearcher;
 
-    public TransportTaskSolver(TransportTaskTable transportTaskTable, IPrimalBasisSearcher primalBasisSearcher)
+    public TransportTaskSolver(IPrimalBasisSearcher primalBasisSearcher)
     {
-        _transportTaskTable = transportTaskTable;
         _primalBasisSearcher = primalBasisSearcher;
     }
 
-    public void Solve()
+    public void Solve(TransportTaskTable table)
     {
-        _primalBasisSearcher.SearchBasis(_transportTaskTable);
+        _primalBasisSearcher.SearchBasis(table);
+        EnsureIsValidPrimalBasis(table);
 
-        EnsureIsValidPrimalBasis();
+        var basisCells = table.Cells.Where(cell => cell.IsBases).ToArray();
+
     }
 
-    private void EnsureIsValidPrimalBasis()
+    private void FillWeights(TransportTaskTable table, IReadOnlyCollection<TransportTaskTable.TransportTaskCell> cells)
     {
-        if (_transportTaskTable.Cells.Count(cell => cell.IsBases) != _transportTaskTable.N + _transportTaskTable.M - 1)
+
+    }
+
+    private void EnsureIsValidPrimalBasis(TransportTaskTable table)
+    {
+        if (table.Cells.Count(cell => cell.IsBases) != table.N + table.M - 1)
             throw new Exception("Incorrect basis cells count.");
     }
 }
