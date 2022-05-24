@@ -6,38 +6,39 @@ public static class Extentions
 {
     
 
-    public static void FillWeight(this TransportTaskTable.TransportTaskCell cell)
+    public static bool CanFillWeight(this TransportTaskCell cell) =>
+        (cell.U is null && cell.V is not null) || (cell.U is not null && cell.V is null);
+
+    public static void FillWeight(this TransportTaskCell cell)
     {
-        if (cell.U is not null || cell.V is not null)
+        if (cell.U is null && cell.V is null)
             throw new Exception("Cannot calculate weight because none initialized.");
 
         if (cell.U is null)
-            cell.V = cell.Cost - cell.U;
+        {
+            var u = cell.Cost - cell.V;
+
+            cell.U = u;
+            cell.Row.SetU(u.Value);
+        }
         else
-            cell.U = cell.Cost - cell.V;
+        {
+            var v = cell.Cost - cell.U;
+
+            cell.V = cell.Cost - cell.U;
+            cell.Column.SetV(v.Value);
+        }
     }
 
-    public static void SetU(this TransportTaskTable.TransportTaskColumn column, decimal u)
+    public static void SetU(this TransportTaskRow row, decimal u)
     {
-        foreach (var cell in column.Cells)
+        foreach (var cell in row.Cells)
             cell.U = u;
     }
 
-    public static void SetU(this TransportTaskTable.TransportTaskRow row, decimal u)
-    {
-        foreach (var cell in row.Cells)
-            cell.U = u;
-    }
-
-    public static void SetV(this TransportTaskTable.TransportTaskColumn column, decimal v)
+    public static void SetV(this TransportTaskColumn column, decimal v)
     {
         foreach (var cell in column.Cells)
-            cell.V = v;
-    }
-
-    public static void SetV(this TransportTaskTable.TransportTaskRow row, decimal v)
-    {
-        foreach (var cell in row.Cells)
             cell.V = v;
     }
 }

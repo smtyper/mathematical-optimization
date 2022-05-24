@@ -20,8 +20,51 @@ public class TransportTaskSolver
 
     }
 
-    private void FillWeights(TransportTaskTable table, IReadOnlyCollection<TransportTaskTable.TransportTaskCell> cells)
+    private static void ToNewBasis(TransportTaskTable table)
     {
+        static void Fill(TransportTaskCell cell)
+        {
+            var crossCells = cell.Row.Cells.Concat(cell.Column.Cells).ToArray();
+
+            cell.Q = crossCells.Any(cell => cell.Q is QMark.Add) ?
+                QMark.Subtract :
+                QMark.Add;
+        }
+
+        var newBasisCell = table.Cells.MaxBy(cell => cell.Mark);
+        newBasisCell!.Q = QMark.Add;
+
+        bool CanFill(TransportTaskCell cell) => OptionsCount(cell) is 1 or 2;
+
+        int OptionsCount(TransportTaskCell cell) =>
+            cell.Row.Cells.Count(rowCell => (rowCell.IsBases || rowCell == newBasisCell) &&
+                                            rowCell.Q is not QMark.Empty) +
+            cell.Column.Cells.Count(columnCell => (columnCell.IsBases || columnCell == newBasisCell) &&
+                                               columnCell.Q is not QMark.Empty);
+
+        var basisCells = table.Cells
+            .Where(cell => cell.IsBases &&
+                           cell.Row.Cells.Count(rowCell => rowCell.IsBases || rowCell == newBasisCell) > 1 &&
+                           cell.Column.Cells.Count(columnCell => columnCell.IsBases || columnCell == newBasisCell) > 1)
+            .ToArray();
+
+        while (basisCells.Any(CanFill))
+            Fill(basisCells.First(CanFill));
+
+        var excludedCell = basisCells.Where(cell => cell.Q is QMark.Subtract).MinBy(cell => cell.X);
+        var qValue = excludedCell!.X!.Value;
+
+        excludedCell.X = null;
+
+        foreach (var cell in table.Cells.Where(cell => cell.Q is not QMark.Empty))
+            if (cell.Q is QMark.Add)
+                cell.X = cell.X is null ?
+                    qValue :
+                    cell.X + qValue;
+            else
+                cell.X -= qValue;
+    }
+
     private static void FillWeights(TransportTaskTable table)
     {
         var basisCells = table.Cells.Where(cell => cell.IsBases).ToArray();
