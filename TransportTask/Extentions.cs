@@ -4,7 +4,14 @@ namespace TransportTask;
 
 public static class Extentions
 {
-    
+    public static void ClearWeights(this TransportTaskTable table)
+    {
+        foreach (var cell in table.Cells)
+        {
+            cell.U = null;
+            cell.V = null;
+        }
+    }
 
     public static bool CanFillWeight(this TransportTaskCell cell) =>
         (cell.U is null && cell.V is not null) || (cell.U is not null && cell.V is null);
