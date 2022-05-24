@@ -22,7 +22,15 @@ public class TransportTaskSolver
 
     private void FillWeights(TransportTaskTable table, IReadOnlyCollection<TransportTaskTable.TransportTaskCell> cells)
     {
+    private static void FillWeights(TransportTaskTable table)
+    {
+        var basisCells = table.Cells.Where(cell => cell.IsBases).ToArray();
 
+        basisCells.First().Row.SetU(0);
+
+        while (table.Cells.Any(Extentions.CanFillWeight))
+            foreach (var cell in table.Cells.Where(cell => cell.IsBases && cell.CanFillWeight()))
+                cell.FillWeight();
     }
 
     private void EnsureIsValidPrimalBasis(TransportTaskTable table)
