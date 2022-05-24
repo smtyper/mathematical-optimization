@@ -57,37 +57,4 @@ public record TransportTaskTable
     public IReadOnlyList<TransportTaskRow> Rows { get; }
 
     public IReadOnlyList<TransportTaskColumn> Columns { get; }
-
-    public record TransportTaskRow(int I, decimal A, IReadOnlyCollection<TransportTaskCell> Cells)
-    {
-        public decimal RemainedA { get; set; }
-    }
-
-    public record TransportTaskColumn(int J, decimal B, IReadOnlyCollection<TransportTaskCell> Cells)
-    {
-        public decimal RemainedB { get; set; }
-    }
-
-    public record TransportTaskCell
-    {
-        public int I { get; init; }
-
-        public int J { get; init; }
-
-        public decimal Cost { get; init; }
-
-        public TransportTaskRow Row { get; set; }
-
-        public TransportTaskColumn Column { get; set; }
-
-        public decimal? X { get; set; }
-
-        public decimal? U { get; set; }
-
-        public decimal? V { get; set; }
-
-        public bool IsBases => X is not null;
-
-        public decimal Mark => V + U - X ?? throw new NullReferenceException();
-    }
 }
