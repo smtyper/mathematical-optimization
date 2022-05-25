@@ -20,6 +20,17 @@ public class TransportTaskSolver
             if (table.Cells.Any(cell => cell.Mark > 0))
             {
                 ToNewBasis(table);
+
+                // var consoleView = string.Join("\n", table.Rows
+                //     .Select(row => string.Join("\t", row.Cells.Select(cell => cell.Q switch
+                //     {
+                //         QMark.Add => "Q+",
+                //         QMark.Subtract => "Q-",
+                //         QMark.Empty => cell.IsBases ? "X" : "_",
+                //         _ => throw new ArgumentOutOfRangeException()
+                //     }))));
+                // Console.WriteLine(consoleView + "\n\n\n\n" );
+
                 table.ClearWeights();
             }
             else
