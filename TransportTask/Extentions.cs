@@ -10,6 +10,7 @@ public static class Extentions
         {
             cell.U = null;
             cell.V = null;
+            cell.Q = QMark.Empty;
         }
     }
 
