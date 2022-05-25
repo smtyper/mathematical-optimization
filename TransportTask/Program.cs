@@ -3,12 +3,13 @@ using TransportTask.Models;
 
 var costMatrix = new[]
 {
-    new[] { 1M, 2M, 1M, 3M },
-    new[] { 0.5M, 1M, 2M, 0.5M },
-    new[] { 2M, 1M, 1M, 2M }
+    new[] { 3M, 2.4M, 1.1M, 1.2M, 2.5M },
+    new[] { 2.6M, 0.4M, 2.9M, 2M, 2.4M },
+    new[] { 2.7M, 1.4M, 1.4M, 1M, 1.8M },
+    new[] { 0.6M, 1.4M, 2.8M, 0.8M, 0.2M }
 };
-var reserves = new[] { 200M, 30, 100M };
-var requests = new[] { 150M, 50, 30M, 100M };
+var reserves = new[] { 210M, 190M, 150M, 250M };
+var requests = new[] { 150M, 150M, 150M, 150M, 200M };
 
 var table = new TransportTaskTable(costMatrix, reserves, requests);
 var solver = new TransportTaskSolver(new NorthWestCornerPrimalBasisSearcher());
