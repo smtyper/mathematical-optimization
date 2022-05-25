@@ -25,8 +25,6 @@ public class TransportTaskSolver
             else
                 break;
         }
-
-
     }
 
     private static void ToNewBasis(TransportTaskTable table)
@@ -43,22 +41,24 @@ public class TransportTaskSolver
         var newBasisCell = table.Cells.MaxBy(cell => cell.Mark);
         newBasisCell!.Q = QMark.Add;
 
-        bool CanFill(TransportTaskCell cell) => OptionsCount(cell) is 1 or 2;
+        bool CanUpdate(TransportTaskCell cell) => cell.Q is QMark.Empty &&
+                                                  QMarksCount(QMark.Add, cell) is (0, 1) or (1, 0) or (1, 1) ^
+                                                  QMarksCount(QMark.Subtract, cell) is (0, 1) or (1, 0) or (1, 1);
 
-        int OptionsCount(TransportTaskCell cell) =>
-            cell.Row.Cells.Count(rowCell => (rowCell.IsBases || rowCell == newBasisCell) &&
-                                            rowCell.Q is not QMark.Empty) +
-            cell.Column.Cells.Count(columnCell => (columnCell.IsBases || columnCell == newBasisCell) &&
-                                               columnCell.Q is not QMark.Empty);
+        (int InRow, int InColumn) QMarksCount(QMark qValue, TransportTaskCell cell) =>
+            (cell.Row.Cells.Count(rowCell => rowCell.Q == qValue),
+                cell.Column.Cells.Count(columnCell => columnCell.Q == qValue));
 
         var basisCells = table.Cells
             .Where(cell => cell.IsBases &&
                            cell.Row.Cells.Count(rowCell => rowCell.IsBases || rowCell == newBasisCell) > 1 &&
                            cell.Column.Cells.Count(columnCell => columnCell.IsBases || columnCell == newBasisCell) > 1)
+            .Append(newBasisCell)
             .ToArray();
 
-        while (basisCells.Any(CanFill))
-            Fill(basisCells.First(CanFill));
+        while (basisCells.Any(CanUpdate))
+            foreach (var basisCell in basisCells.Where(CanUpdate))
+                Fill(basisCell);
 
         var excludedCell = basisCells.Where(cell => cell.Q is QMark.Subtract).MinBy(cell => cell.X);
         var qValue = excludedCell!.X!.Value;

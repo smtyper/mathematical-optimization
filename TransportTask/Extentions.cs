@@ -49,4 +49,9 @@ public static class Extentions
         foreach (var cell in column.Cells)
             cell.V = v;
     }
+
+    public static IReadOnlyCollection<TransportTaskCell> CrossCells(this TransportTaskCell cell) => cell.Row.Cells
+        .Concat(cell.Column.Cells)
+        .Except(new[] { cell })
+        .ToArray();
 }
