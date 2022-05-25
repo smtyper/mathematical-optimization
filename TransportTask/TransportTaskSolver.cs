@@ -81,8 +81,11 @@ public class TransportTaskSolver
         basisCells.First().Row.SetU(0);
 
         while (table.Cells.Any(Extentions.CanFillWeight))
-            foreach (var cell in table.Cells.Where(cell => cell.IsBases && cell.CanFillWeight()))
-                cell.FillWeight();
+            if (basisCells.Any(Extentions.CanFillWeight))
+                foreach (var cell in basisCells.Where(Extentions.CanFillWeight))
+                    cell.FillWeight();
+            else
+                basisCells.First(cell => cell.U is null && cell.V is null).Row.SetU(0);
     }
 
     private static void EnsureIsValidPrimalBasis(TransportTaskTable table)
