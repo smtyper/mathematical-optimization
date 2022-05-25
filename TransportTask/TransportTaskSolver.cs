@@ -42,8 +42,13 @@ public class TransportTaskSolver
         newBasisCell!.Q = QMark.Add;
 
         bool CanUpdate(TransportTaskCell cell) => cell.Q is QMark.Empty &&
-                                                  QMarksCount(QMark.Add, cell) is (0, 1) or (1, 0) or (1, 1) ^
-                                                  QMarksCount(QMark.Subtract, cell) is (0, 1) or (1, 0) or (1, 1);
+                                                  (QMarksCount(QMark.Add, cell), QMarksCount(QMark.Subtract, cell)) is
+                                                      ((0, 0), (0, 1)) or
+                                                      ((0, 0), (1, 0)) or
+                                                      ((0, 0), (1, 1)) or
+                                                      ((0, 1), (0, 0)) or
+                                                      ((1, 0), (0, 0)) or
+                                                      ((1, 1), (0, 0));
 
         (int InRow, int InColumn) QMarksCount(QMark qValue, TransportTaskCell cell) =>
             (cell.Row.Cells.Count(rowCell => rowCell.Q == qValue),
