@@ -62,8 +62,14 @@ public class TransportTaskSolver
             .ToArray();
 
         while (basisCells.Any(CanUpdate))
-            foreach (var basisCell in basisCells.Where(CanUpdate))
-                Fill(basisCell);
+            foreach (var cell in basisCells
+                         .Where(CanUpdate)
+                         .OrderByDescending(cell => QMarksCount(QMark.Add, cell) is (1, 1) ||
+                                                    QMarksCount(QMark.Subtract, cell) is (1, 1))
+                         .ToArray())
+
+                if (CanUpdate(cell))
+                    Fill(cell);
 
         var excludedCell = basisCells.Where(cell => cell.Q is QMark.Subtract).MinBy(cell => cell.X);
         var qValue = excludedCell!.X!.Value;
