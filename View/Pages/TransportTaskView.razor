@@ -1,0 +1,205 @@
+﻿@page "/TransportTaskView"
+@using TransportTask
+@using TransportTask.Models
+
+<div class="container-fluid">
+  <div class="col-md-6">
+    
+    <div class="input-group input-group-sm mb-3 w-25">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Rows</span>
+      </div>
+      <input type="number" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+             value="0"
+             @onchange="RowsChangeEvent">
+    </div>
+
+    <div class="input-group input-group-sm mb-3 w-25">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Columns</span>
+      </div>
+      <input type="number" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+             value="0"
+             @onchange="ColumnsChangeEvent">
+    </div>
+    
+    <button type="button" class="btn btn-secondary mb-3" @onclick="() => TableVisibility = true">Show table</button>
+    <button type="button" class="btn btn-secondary mb-3" @onclick="() => TableVisibility = false"> Hide table</button>
+    
+    @if (TableVisibility)
+    {
+      foreach (var rowIndex in Enumerable.Range(0, Rows))
+      {
+        <div class="input-group input-group-sm mb-3">
+          @foreach (var columnIndex in Enumerable.Range(0, Columns))
+          {
+            <input type="number" id="@($"cell{rowIndex}{columnIndex}")" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                   value="0"
+                   @onchange="args => TableCellChangeEvent(args, rowIndex, columnIndex)">
+          }
+        </div>
+        <br>
+      }
+      
+      <div class="input-group input-group-sm mb-1">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Reserves (A)</span>
+        </div>
+        
+        @foreach (var rowIndex in Enumerable.Range(0, Rows))
+        {
+          <input type="number" id="@($"reserve{rowIndex}")" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                 value="0"
+                 @onchange="args => ReserveCellChangeEvent(args, rowIndex)">
+        }
+      </div>
+      
+      <div class="input-group input-group-sm mb-1">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Requests (B)</span>
+        </div>
+        
+        @foreach (var columnIndex in Enumerable.Range(0, Columns))
+        {
+          <input type="number" id="@($"requests{columnIndex}")" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                 value="0"
+                 @onchange="args => RequestCellChangeEvent(args, columnIndex)">
+        }
+      </div>
+      
+      <button type="button" class="btn btn-secondary mb-3" @onclick="Solve"> Solve</button>
+      <h1>@Result</h1>
+    }
+  </div>
+</div>
+
+@code {
+  private readonly TransportTaskSolver _transportTaskSolver = new TransportTaskSolver(
+    new NorthWestCornerPrimalBasisSearcher());
+  
+  private int Rows { get; set; }
+
+  private int Columns { get; set; }
+
+  private bool TableVisibility { get; set; }
+  
+  private decimal[][] TableCells { get; set; }
+
+  private decimal[] ReserveCells { get; set; } = null;
+
+  private decimal[] RequestCells { get; set; } = null;
+
+  public decimal Result { get; set; }
+
+  public void Solve()
+  {
+    var transportTaskTable = new TransportTaskTable(TableCells, ReserveCells, RequestCells);
+
+    var solution = _transportTaskSolver.Solve(transportTaskTable);
+
+    Result = solution;
+  }
+  
+  private void RequestCellChangeEvent(ChangeEventArgs changeEventArgs, int j)
+  {
+    var inputString = changeEventArgs.Value?.ToString();
+    var inputValue = decimal.TryParse(inputString, out var result) ?
+      result :
+      0;
+
+    RequestCells[j] = inputValue;
+  }
+
+  private void ReserveCellChangeEvent(ChangeEventArgs changeEventArgs, int i)
+  {
+    var inputString = changeEventArgs.Value?.ToString();
+    var inputValue = decimal.TryParse(inputString, out var result) ?
+      result :
+      0;
+
+    ReserveCells[i] = inputValue;
+  }
+
+  private void TableCellChangeEvent(ChangeEventArgs changeEventArgs, int i, int j)
+  {
+    var inputString = changeEventArgs.Value?.ToString();
+    var inputValue = decimal.TryParse(inputString, out var result) ?
+      result :
+      0;
+
+    TableCells[i][j] = inputValue;
+  }
+
+  private void RowsChangeEvent(ChangeEventArgs changeEventArgs)
+  {
+    var inputString = changeEventArgs.Value?.ToString();
+    var inputValue = int.TryParse(inputString, out var result) ?
+      result :
+      0;
+
+    Rows = inputValue;
+
+    if (Rows <= 0 || Columns <= 0)
+      return;
+    
+    TableCells = GetUpdatedMatrix();
+    ReserveCells = RequestCells is null ?
+      new decimal[Rows] :
+      Enumerable.Range(0, Rows)
+      .Select(rowIndex => rowIndex < ReserveCells.Length ?
+        ReserveCells[rowIndex] :
+        0)
+      .ToArray();
+  }
+  
+  private void ColumnsChangeEvent(ChangeEventArgs changeEventArgs)
+  {
+    var inputString = changeEventArgs.Value?.ToString();
+    var inputValue = int.TryParse(inputString, out var result) ?
+      result :
+      0;
+
+    Columns = inputValue;
+
+    if (Rows <= 0 || Columns <= 0)
+      return;
+    
+    TableCells = GetUpdatedMatrix();
+    RequestCells = ReserveCells is null ?
+      new decimal[Columns] :
+      Enumerable.Range(0, Columns)
+      .Select(columnIndex => columnIndex < RequestCells.Length ?
+        RequestCells[columnIndex] :
+        0)
+      .ToArray();
+  }
+
+  private decimal[][] GetUpdatedMatrix()
+  {
+    if (TableCells is null)
+    {
+      var emptyArray = Enumerable.Range(0, Rows)
+        .Select(_ => Enumerable.Range(0, Columns)
+          .Select(_ => 0M)
+          .ToArray())
+        .ToArray();
+
+      return emptyArray;
+
+    }
+    
+    decimal TryGetValue(int i, int j) => i < TableCells.Length ?
+      j < TableCells[i].Length ?
+        TableCells[i][j] :
+        0 :
+      0;
+
+    var newTable = Enumerable.Range(0, Rows)
+      .Select(rowIndex => Enumerable.Range(0, Columns)
+        .Select(columnIndex => TryGetValue(rowIndex, columnIndex))
+        .ToArray())
+      .ToArray();
+
+    return newTable;
+  }
+}
