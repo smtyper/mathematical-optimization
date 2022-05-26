@@ -25,3 +25,9 @@ jobs:
       with:
         branch: gh-pages
         folder: release/wwwroot
+
+    - name: Change base-tag in index.html from / to BlazorGitHubPagesDemo
+      run: sed -i 's/<base href="\/" \/>/<base href="\/View\/View.csproj\/" \/>/g' release/wwwroot/index.html
+      
+    - name: Add .nojekyll file
+      run: touch release/wwwroot/.nojekyll
