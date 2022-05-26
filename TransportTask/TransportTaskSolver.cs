@@ -8,7 +8,7 @@ public class TransportTaskSolver
 
     public TransportTaskSolver(IPrimalBasisSearcher primalBasisSearcher) => _primalBasisSearcher = primalBasisSearcher;
 
-    public void Solve(TransportTaskTable table)
+    public decimal Solve(TransportTaskTable table)
     {
         _primalBasisSearcher.SearchBasis(table);
         EnsureIsValidPrimalBasis(table);
@@ -36,6 +36,10 @@ public class TransportTaskSolver
             else
                 break;
         }
+
+        var result = table.Cells.Where(cell => cell.IsBases).Sum(cell => cell.Cost * cell.X!.Value);
+
+        return result;
     }
 
     private static void ToNewBasis(TransportTaskTable table)
@@ -71,7 +75,7 @@ public class TransportTaskSolver
                            cell.Column.Cells.Count(columnCell => columnCell.IsBases || columnCell == newBasisCell) > 1)
             .Append(newBasisCell)
             .ToArray();
-
+        ;
         while (basisCells.Any(CanUpdate))
             foreach (var cell in basisCells
                          .Where(CanUpdate)
