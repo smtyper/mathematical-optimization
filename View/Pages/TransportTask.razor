@@ -1,0 +1,96 @@
+﻿@page "/TransportTask"
+
+<h1>@Context</h1>
+
+
+<div class="container-fluid">
+  <div class="col-md-6">
+    
+    <div class="input-group input-group-sm mb-3 w-25">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Rows</span>
+      </div>
+      <input type="number" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+             @bind="Rows">
+    </div>
+
+    <div class="input-group input-group-sm mb-3 w-25">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Columns</span>
+      </div>
+      <input type="number" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+             @bind="Columns">
+    </div>
+    
+    <button type="button" class="btn btn-secondary mb-3" @onclick="() => TableVisibility = true">Show table</button>
+    <button type="button" class="btn btn-secondary mb-3" @onclick="() => TableVisibility = false"> Hide table</button>
+    
+    @if (TableVisibility)
+    {
+      foreach (var rowIndex in Enumerable.Range(0, Rows))
+      {
+        <div class="input-group input-group-sm mb-3">
+          @foreach (var columnIndex in Enumerable.Range(0, Columns))
+          {
+            <input type="number" id="@($"cell{rowIndex}{columnIndex}")" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                   value="0">
+          }
+        </div>
+        <br>
+      }
+      
+      <div class="input-group input-group-sm mb-1">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Reserves (A)</span>
+        </div>
+        
+        @foreach (var rowIndex in Enumerable.Range(0, Rows))
+        {
+          <input type="number" id="@($"reserve{rowIndex}")" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                 value="0">
+        }
+      </div>
+      
+      <div class="input-group input-group-sm mb-1">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Requests (B)</span>
+        </div>
+        
+        @foreach (var columnIndex in Enumerable.Range(0, Columns))
+        {
+          <input type="number" id="@($"requests{columnIndex}")" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                 value="0">
+        }
+      </div>
+      
+      <button type="button" class="btn btn-secondary mb-3" @onclick="Solve"> Solve</button>
+    }
+  </div>
+</div>
+
+@code {
+  private string Context;
+  
+  private int Rows { get; set; }
+
+  private int Columns { get; set; }
+
+  private bool TableVisibility { get; set; }
+
+  public void Solve()
+  {
+    var matrix = new decimal[Rows][];
+
+    foreach (var rowIndex in Enumerable.Range(0, Rows))
+    {
+      matrix[rowIndex] = new decimal[Columns];
+
+      foreach (var columnIndex in Enumerable.Range(0, Columns))
+      {
+        var element = (InputText)new ElementReference($"cell{rowIndex}{columnIndex}");
+        @Context = element.Context;
+        // matrix[rowIndex][columnIndex] = element.Context;
+      }
+    }
+  }
+}
