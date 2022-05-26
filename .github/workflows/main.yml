@@ -17,4 +17,4 @@ jobs:
         include-prerelease: true
         
     - name: Publish .NET Core Project
-      run: dotnet publish View.csproj -c Release --output release --nologo
+      run: dotnet publish View/View.csproj -c Release --output release --nologo
