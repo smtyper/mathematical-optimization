@@ -1,0 +1,174 @@
+﻿@page "/GeometricMethodView"
+@using LinearProgramming
+@using LinearProgramming.Models
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group input-group-sm mb-3 w-25">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Constraints count</span>
+                </div>
+                <input type="number" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                       value="1"
+                       @onchange="ConstraintsCountChangeEvent">
+            </div>
+            
+            <div class="input-group input-group-sm mb-3">
+                
+                <div class="input-group-prepend">
+                    <span class="input-group-text">X1 *</span>
+                </div>
+                <input type="number" class="form-control" aria-label="Small"
+                       aria-describedby="inputGroup-sizing-sm"
+                       @bind="X1">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text">X2 *</span>
+                </div>
+                <input type="number" class="form-control" aria-label="Small"
+                       aria-describedby="inputGroup-sizing-sm"
+                       @bind="X2">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text"> -> </span>
+                </div>
+                <select @bind="Target">
+                    <option>@("min")</option>
+                    <option>@("max")</option>
+                </select>
+            </div>
+
+            @if (ConstraintsCount > 0)
+            {
+                @foreach (var index in Enumerable.Range(0, ConstraintsCount))
+                {
+                    <div class="input-group input-group-sm mb-3">
+                        
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">X1 *</span>
+                        </div>
+                        <input type="number" class="form-control" aria-label="Small"
+                               aria-describedby="inputGroup-sizing-sm"
+                               @bind="ConstraintCells[index].X1">
+
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">X2 *</span>
+                        </div>
+                        <input type="number" class="form-control" aria-label="Small"
+                               aria-describedby="inputGroup-sizing-sm"
+                               @bind="ConstraintCells[index].X2">
+                        
+                        <select @bind="ConstraintCells[index].ConstraintType">
+                            <option>@("=")</option>
+                            <option>@("<>")</option>
+                            <option>@(">")</option>
+                            <option>@("<")</option>
+                            <option>@(">=")</option>
+                            <option>@("<=")</option>
+                        </select>
+                        
+                        <input type="number" class="form-control" aria-label="Small"
+                               aria-describedby="inputGroup-sizing-sm"
+                               @bind="ConstraintCells[index].ConstantPart">
+                        
+                    </div>
+                }
+            }
+            
+            <button type="button" class="btn btn-secondary mb-3" @onclick="Solve"> Solve</button>
+                  <input class="form-control mb-3" type="text"
+                         placeholder=@($"Result: f({(ResultPoint is null ? string.Empty : $"{ResultPoint.First}, {ResultPoint.Second}")}) = {(Result is 0 ? string.Empty : Result)}") readonly>
+            
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private int ConstraintsCount { get; set; } = 1;
+    
+    private decimal X1 { get; set; }
+    
+    private decimal X2 { get; set; }
+    
+    private string Target { get; set; } = "min";
+
+    private ConstraintView[] ConstraintCells { get; set; } = { new() { ConstraintType = "="} };
+    
+    private decimal Result { get; set; }
+    
+    private TwoDimensionalTaskSolver.Point ResultPoint { get; set; }
+
+    private void Solve()
+    {
+        var configuration = new TwoDimensionalTaskSolverConfiguration
+        {
+            ConstraintFunctions = ConstraintCells
+                .Select(constraintView => new LinearFunction
+                {
+                    Coefficients = new [] { constraintView.X1, constraintView.X2 },
+                    ConstantPart = constraintView.ConstantPart,
+                    ConstraintType = constraintView.ConstraintType switch
+                    {
+                        "=" => ConstraintType.Equal,
+                        "<>" => ConstraintType.NotEqual,
+                        ">" => ConstraintType.GreaterThan,
+                        "<" => ConstraintType.LessThan,
+                        ">=" => ConstraintType.GreaterThanOrEqual,
+                        "<=" => ConstraintType.LessThanOrEqual,
+                        _ => throw new ArgumentOutOfRangeException()
+                    }
+                })
+                .ToArray(),
+            TargetFunction = new LinearFunction
+            {
+                Coefficients = new [] { X1, X2 },
+                ConstantPart = null,
+                ConstraintType = ConstraintType.Equal
+            },
+            Type = Target switch
+            {
+                "min" => OptimizationType.ToMin,
+                "max" => OptimizationType.ToMax,
+                _ => throw new ArgumentOutOfRangeException()
+            }
+        };
+        var solver = new TwoDimensionalTaskSolver(configuration);
+        var point = solver.Solve();
+        var value = X1 * point.First + X2 * point.Second;
+
+        Result = value;
+        ResultPoint = point;
+    }
+
+    private void ConstraintsCountChangeEvent(ChangeEventArgs changeEventArgs)
+    {
+        var inputString = changeEventArgs.Value?.ToString();
+        var inputValue = int.TryParse(inputString, out var result) ?
+            result :
+            0;
+
+        ConstraintsCount = inputValue;
+        
+        if (ConstraintsCount > 0)
+            ConstraintCells = ConstraintCells is null ?
+                null :
+                Enumerable.Range(0, ConstraintsCount)
+                    .Select(index => index < ConstraintCells.Length ?
+                        ConstraintCells[index] :
+                        new ConstraintView { ConstraintType = "=" })
+                    .ToArray();
+    }
+
+    private record ConstraintView
+    {
+        public decimal X1 { get; set; }
+
+        public decimal X2 { get; set; }
+
+        public decimal ConstantPart { get; set; }
+
+        public string ConstraintType { get; set; }
+    }
+}
